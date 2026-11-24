@@ -1,0 +1,789 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#073b4c">
+  <meta name="description" content="A pocket field guide to remarkable marine life, from coral reefs to the open ocean.">
+  <title>Blue Atlas — A Marine Life Field Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #103b46;
+      --muted: #58737a;
+      --ocean: #073b4c;
+      --sea: #087e83;
+      --foam: #eef7f4;
+      --sand: #f4eddd;
+      --coral: #e77a5b;
+      --line: #dce9e5;
+      font-family: "DM Sans", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; color: var(--ink); background: #fbfcf8; }
+    a { color: inherit; }
+    button, input, textarea { font: inherit; }
+    img { display: block; }
+
+    .topbar {
+      position: absolute;
+      z-index: 2;
+      top: 0;
+      left: 0;
+      display: flex;
+      width: 100%;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px max(6vw, 24px);
+      color: white;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+    .brand-mark { display: grid; width: 34px; height: 34px; place-items: center; border: 1px solid #ffffff80; border-radius: 50%; font-size: 17px; }
+    .topbar nav { display: flex; gap: 28px; font-size: 13px; }
+    .topbar nav a { display: inline-flex; min-height: 36px; align-items: center; text-decoration: none; opacity: .9; }
+    .topbar nav a:hover { opacity: 1; text-decoration: underline; text-underline-offset: 5px; }
+
+    .hero {
+      position: relative;
+      display: flex;
+      min-height: 570px;
+      align-items: center;
+      overflow: hidden;
+      padding: 110px max(10vw, 28px) 76px;
+      color: white;
+      background: linear-gradient(90deg, #052f40ed 0%, #064353bb 48%, #053f4c38 100%),
+        url("https://images.unsplash.com/photo-1530053969600-caed2596d242?auto=format&fit=crop&w=2000&q=85") center 48% / cover;
+    }
+    .hero::after {
+      position: absolute;
+      right: -80px;
+      bottom: -180px;
+      width: 490px;
+      height: 490px;
+      border: 1px solid #ffffff2b;
+      border-radius: 50%;
+      box-shadow: 0 0 0 35px #ffffff0b, 0 0 0 72px #ffffff08;
+      content: "";
+      pointer-events: none;
+    }
+    .hero-content { position: relative; z-index: 1; max-width: 650px; }
+    .eyebrow { margin: 0 0 18px; color: #a7e4d8; font-size: 11px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1, h2, .species-name { font-family: "DM Serif Display", Georgia, serif; font-weight: 400; }
+    h1 { max-width: 620px; margin-bottom: 20px; font-size: clamp(52px, 7vw, 88px); letter-spacing: -.035em; line-height: .98; }
+    .hero-copy { max-width: 470px; margin-bottom: 32px; color: #e0efed; font-size: 16px; line-height: 1.75; }
+    .hero-link { display: inline-flex; align-items: center; gap: 12px; color: white; font-size: 13px; font-weight: 700; text-decoration: none; }
+    .arrow { display: grid; width: 34px; height: 34px; place-items: center; border: 1px solid #ffffff90; border-radius: 50%; transition: transform .2s; }
+    .hero-link:hover .arrow { transform: translateY(3px); }
+
+    main { padding: 82px max(6vw, 24px) 90px; }
+    .intro { display: flex; align-items: end; justify-content: space-between; gap: 28px; margin: 0 auto 34px; max-width: 1180px; }
+    .intro h2 { margin-bottom: 10px; font-size: clamp(34px, 4vw, 48px); letter-spacing: -.025em; }
+    .intro p { max-width: 490px; margin-bottom: 0; color: var(--muted); font-size: 14px; line-height: 1.7; }
+    .search-wrap { position: relative; flex: 0 0 250px; }
+    .search-wrap::before { position: absolute; top: 12px; left: 14px; color: #789096; content: "⌕"; font-size: 21px; line-height: 1; }
+    .search { width: 100%; padding: 12px 14px 12px 42px; border: 1px solid var(--line); border-radius: 4px; outline: none; background: white; color: var(--ink); font-size: 13px; }
+    .search:focus { border-color: var(--sea); box-shadow: 0 0 0 3px #087e8318; }
+
+    .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; max-width: 1180px; margin: 0 auto; }
+    .card { overflow: hidden; border: 1px solid var(--line); border-radius: 7px; background: white; transition: transform .2s, box-shadow .2s; }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 15px 35px #103b4612; }
+    .card[hidden] { display: none; }
+    .card-image { position: relative; height: 220px; overflow: hidden; background: #d7e9e4; }
+    .card-image img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s; }
+    .card:hover .card-image img { transform: scale(1.04); }
+    .habitat { position: absolute; right: 12px; bottom: 12px; padding: 7px 10px; border: 1px solid #ffffff70; border-radius: 99px; background: #073b4ce8; color: white; font-size: 10px; letter-spacing: .07em; text-transform: uppercase; }
+    .card-content { padding: 21px 21px 19px; }
+    .species-name { margin-bottom: 2px; font-size: 25px; line-height: 1.2; }
+    .scientific { margin-bottom: 15px; color: #7d9699; font-size: 11px; font-style: italic; }
+    .description { min-height: 65px; margin-bottom: 17px; color: var(--muted); font-size: 13px; line-height: 1.65; }
+    .facts { display: flex; gap: 22px; padding-top: 14px; border-top: 1px solid #e8efec; }
+    .fact { display: grid; gap: 4px; }
+    .fact-label { color: #81969a; font-size: 9px; font-weight: 700; letter-spacing: .11em; text-transform: uppercase; }
+    .fact-value { color: var(--ink); font-size: 12px; font-weight: 600; }
+    .conservation { display: inline-flex; align-items: center; gap: 6px; margin-top: 16px; color: #59846e; font-size: 11px; font-weight: 600; }
+    .conservation::before { width: 7px; height: 7px; border-radius: 50%; background: #7cb28b; content: ""; }
+    .empty-state { display: none; padding: 42px 12px; color: var(--muted); text-align: center; }
+    .empty-state.visible { display: block; }
+
+    .care-section { max-width: 1180px; margin: 72px auto 0; scroll-margin-top: 24px; }
+    .care-heading { max-width: 690px; margin-bottom: 27px; }
+    .care-heading h2 { margin-bottom: 12px; font-size: clamp(32px, 4vw, 46px); letter-spacing: -.025em; }
+    .care-heading > p:last-child { margin-bottom: 0; color: var(--muted); font-size: 14px; line-height: 1.7; }
+    .care-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .care-card { padding: 22px; border: 1px solid var(--line); border-radius: 6px; background: white; }
+    .care-card h3 { margin-bottom: 9px; font-size: 15px; }
+    .care-card p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+    .pledge-panel { display: grid; grid-template-columns: minmax(220px, .75fr) minmax(0, 1.25fr); gap: 32px; margin-top: 24px; padding: 28px; border-left: 3px solid var(--coral); background: var(--foam); }
+    .pledge-intro h3 { margin-bottom: 9px; font-family: "DM Serif Display", Georgia, serif; font-size: 29px; font-weight: 400; line-height: 1.15; }
+    .pledge-intro p:last-child { margin-bottom: 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+    .pledge-form { display: grid; gap: 14px; }
+    .pledge-form label, .pledge-form legend { color: var(--ink); font-size: 12px; font-weight: 700; }
+    .pledge-form input[type="text"], .pledge-form textarea {
+      display: block;
+      width: 100%;
+      margin-top: 7px;
+      padding: 11px 12px;
+      border: 1px solid #cbdcd7;
+      border-radius: 4px;
+      outline: none;
+      background: white;
+      color: var(--ink);
+      font-size: 13px;
+    }
+    .pledge-form input:focus, .pledge-form textarea:focus { border-color: var(--sea); box-shadow: 0 0 0 3px #087e8318; }
+    .pledge-form textarea { min-height: 92px; resize: vertical; line-height: 1.55; }
+    .pledge-form fieldset { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; margin: 0; padding: 0; border: 0; }
+    .pledge-form fieldset legend { margin-bottom: 10px; }
+    .pledge-form .check-label { display: flex; align-items: start; gap: 8px; color: var(--muted); font-size: 12px; font-weight: 400; line-height: 1.45; }
+    .check-label input { flex: 0 0 auto; margin: 2px 0 0; accent-color: var(--sea); }
+    .pledge-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+    .pledge-button { padding: 10px 15px; border: 1px solid var(--ocean); border-radius: 4px; background: var(--ocean); color: white; cursor: pointer; font-size: 12px; font-weight: 700; }
+    .pledge-button:hover { background: #0c5261; }
+    .pledge-button.secondary { background: transparent; color: var(--ocean); }
+    .pledge-button.secondary:hover { background: #dcebe6; }
+    .pledge-status { min-height: 18px; margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+    .saved-pledge { margin-top: 4px; padding: 15px; border: 1px solid #cbdcd7; border-radius: 4px; background: #ffffffb8; }
+    .saved-pledge h4 { margin: 0 0 7px; font-size: 13px; }
+    .saved-pledge p, .saved-pledge ul { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .saved-pledge ul { padding-left: 18px; }
+    .saved-details { margin-top: 8px !important; }
+    footer { display: flex; justify-content: space-between; gap: 20px; padding: 24px max(6vw, 24px); background: var(--ocean); color: #c6dcda; font-size: 11px; }
+    footer strong { color: white; letter-spacing: .12em; text-transform: uppercase; }
+
+    @media (max-width: 850px) {
+      .hero { min-height: 520px; }
+      .intro { align-items: start; flex-direction: column; gap: 20px; margin-bottom: 28px; }
+      .search-wrap { flex-basis: auto; width: min(100%, 420px); }
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .pledge-panel { grid-template-columns: 1fr; gap: 20px; }
+    }
+    @media (max-width: 560px) {
+      .topbar { padding: 14px 18px; }
+      .brand { gap: 8px; font-size: 12px; letter-spacing: .09em; }
+      .brand-mark { width: 30px; height: 30px; }
+      .topbar nav { gap: 10px; font-size: 11px; }
+      .topbar nav a { min-height: 34px; }
+      .hero { min-height: 490px; padding: 100px 22px 52px; background-position: 58% center; }
+      h1 { margin-bottom: 16px; font-size: clamp(42px, 11vw, 52px); }
+      .hero-copy { max-width: 390px; margin-bottom: 24px; font-size: 14px; line-height: 1.65; }
+      main { padding: 48px 18px 58px; }
+      .intro { gap: 16px; margin-bottom: 24px; }
+      .intro h2 { font-size: 36px; }
+      .search-wrap { width: 100%; }
+      .search { min-height: 46px; }
+      .grid { grid-template-columns: 1fr; gap: 14px; }
+      .card-image { height: 210px; }
+      .card-content { padding: 18px; }
+      .species-name { font-size: 24px; }
+      .description { min-height: 0; }
+      .facts { gap: 18px; }
+      .care-section { margin-top: 52px; }
+      .care-heading { margin-bottom: 20px; }
+      .care-heading h2 { font-size: 34px; }
+      .care-grid, .pledge-form fieldset { grid-template-columns: 1fr; }
+      .care-grid { gap: 11px; }
+      .care-card { padding: 18px; }
+      .pledge-panel { gap: 18px; margin-top: 18px; padding: 18px; }
+      .pledge-intro h3 { font-size: 27px; }
+      .pledge-form { gap: 16px; }
+      .pledge-form input[type="text"], .pledge-form textarea { min-height: 46px; font-size: 16px; }
+      .pledge-form textarea { min-height: 108px; }
+      .pledge-button { min-height: 44px; padding: 10px 14px; }
+      footer { flex-direction: column; gap: 10px; padding: 22px 18px; line-height: 1.5; }
+    }
+    @media (max-width: 360px) {
+      .topbar { padding-right: 14px; padding-left: 14px; }
+      .topbar nav { gap: 7px; font-size: 10px; }
+      .hero { padding-right: 18px; padding-left: 18px; }
+      main { padding-right: 14px; padding-left: 14px; }
+      .card-image { height: 190px; }
+      .facts { flex-wrap: wrap; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Blue Atlas home"><span class="brand-mark" aria-hidden="true">≈</span> Blue Atlas</a>
+    <nav aria-label="Main navigation">
+      <a href="#field-guide">Field guide</a>
+      <a href="#ocean-care">Ocean care</a>
+    </nav>
+  </header>
+
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-content">
+      <p class="eyebrow">A pocket guide to ocean life</p>
+      <h1 id="hero-title">Meet the life beneath the waves.</h1>
+      <p class="hero-copy">Meet 20 remarkable ocean species, explore where they live, and discover the details that make each one unique.</p>
+      <a class="hero-link" href="#field-guide">Explore the field guide <span class="arrow" aria-hidden="true">↓</span></a>
+    </div>
+  </section>
+
+  <main>
+    <section id="field-guide" aria-labelledby="guide-title">
+      <div class="intro">
+        <div>
+          <p class="eyebrow" style="color: var(--sea);">Field notes · 20 species</p>
+          <h2 id="guide-title">Life in the blue</h2>
+          <p>From tiny reef residents to ocean giants, discover the many forms of marine life and how they fit into their ecosystems.</p>
+        </div>
+        <label class="search-wrap">
+          <span class="visually-hidden" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">Search marine species</span>
+          <input class="search" id="species-search" type="search" placeholder="Search the guide..." autocomplete="off">
+        </label>
+      </div>
+
+      <div class="grid" id="species-grid">
+        <article class="card" data-name="blue whale">
+          <div class="card-image">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/9/97/Balaenoptera_musculus_NOAA.jpg" alt="A blue whale swimming through deep blue water" loading="lazy">
+            <span class="habitat">Open ocean</span>
+          </div>
+          <div class="card-content">
+            <h3 class="species-name">Blue whale</h3>
+            <p class="scientific">Balaenoptera musculus</p>
+            <p class="description">The largest animal known to have ever lived. This gentle giant filters tiny krill from seawater using comb-like baleen plates.</p>
+            <div class="facts">
+              <div class="fact"><span class="fact-label">Length</span><span class="fact-value">Up to 30 m</span></div>
+              <div class="fact"><span class="fact-label">Diet</span><span class="fact-value">Krill</span></div>
+            </div>
+            <span class="conservation">Endangered</span>
+          </div>
+        </article>
+
+        <article class="card" data-name="green sea turtle">
+          <div class="card-image">
+            <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Green_sea_turtle_%28Chelonia_mydas%29_Moorea.jpg/1280px-Green_sea_turtle_%28Chelonia_mydas%29_Moorea.jpg" alt="A green sea turtle swimming over a reef" loading="lazy">
+            <span class="habitat">Coastal waters</span>
+          </div>
+          <div class="card-content">
+            <h3 class="species-name">Green sea turtle</h3>
+            <p class="scientific">Chelonia mydas</p>
+            <p class="description">A long-distance traveler that returns to sandy beaches to nest. Adults graze on seagrass, helping keep underwater meadows healthy.</p>
+            <div class="facts">
+              <div class="fact"><span class="fact-label">Lifespan</span><span class="fact-value">80+ years</span></div>
+              <div class="fact"><span class="fact-label">Diet</span><span class="fact-value">Seagrass & algae</span></div>
+            </div>
+            <span class="conservation">Endangered</span>
+          </div>
+        </article>
+
+        <article class="card" data-name="clownfish">
+          <div class="card-image">
+            <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ad/Amphiprion_ocellaris_%28Clown_anemonefish%29_by_Nick_Hobgood.jpg/1280px-Amphiprion_ocellaris_%28Clown_anemonefish%29_by_Nick_Hobgood.jpg" alt="An orange-and-white clownfish swimming among anemone tentacles" loading="lazy">
+            <span class="habitat">Coral reef</span>
+          </div>
+          <div class="card-content">
+            <h3 class="species-name">Clownfish</h3>
+            <p class="scientific">Amphiprion ocellaris</p>
+            <p class="description">This bright reef fish lives among the stinging tentacles of anemones, protected by a special mucus coating. The two species help one another thrive.</p>
+            <div class="facts">
+              <div class="fact"><span class="fact-label">Length</span><span class="fact-value">Up to 11 cm</span></div>
+              <div class="fact"><span class="fact-label">Home</span><span class="fact-value">Sea anemones</span></div>
+            </div>
+            <span class="conservation">Least concern</span>
+          </div>
+        </article>
+
+        <article class="card" data-name="giant pacific octopus">
+          <div class="card-image">
+            <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/3/33/Enteroctopus_dofleini_189957195.jpg/1280px-Enteroctopus_dofleini_189957195.jpg" alt="A giant Pacific octopus resting on the seafloor" loading="lazy">
+            <span class="habitat">Coastal seafloor</span>
+          </div>
+          <div class="card-content">
+            <h3 class="species-name">Giant Pacific octopus</h3>
+            <p class="scientific">Enteroctopus dofleini</p>
+            <p class="description">A clever, color-changing hunter with eight flexible arms. It can squeeze through tiny gaps and solve puzzles using its remarkable intelligence.</p>
+            <div class="facts">
+              <div class="fact"><span class="fact-label">Arm span</span><span class="fact-value">Up to 5 m</span></div>
+              <div class="fact"><span class="fact-label">Arms</span><span class="fact-value">8</span></div>
+            </div>
+            <span class="conservation">Least concern</span>
+          </div>
+        </article>
+
+        <article class="card" data-name="manta ray">
+          <div class="card-image">
+            <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d1/Reef_manta_ray_%28Manta_alfredi%29_-_49877611173.jpg/1280px-Reef_manta_ray_%28Manta_alfredi%29_-_49877611173.jpg" alt="A reef manta ray gliding through the water" loading="lazy">
+            <span class="habitat">Tropical reef</span>
+          </div>
+          <div class="card-content">
+            <h3 class="species-name">Reef manta ray</h3>
+            <p class="scientific">Mobula alfredi</p>
+            <p class="description">A gentle filter feeder that glides with wing-like fins. Its distinctive head fins funnel plankton-rich water toward its wide mouth.</p>
+            <div class="facts">
+              <div class="fact"><span class="fact-label">Wingspan</span><span class="fact-value">Up to 5.5 m</span></div>
+              <div class="fact"><span class="fact-label">Diet</span><span class="fact-value">Plankton</span></div>
+            </div>
+            <span class="conservation">Vulnerable</span>
+          </div>
+        </article>
+
+        <article class="card" data-name="seahorse">
+          <div class="card-image">
+            <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/2/20/Fish4280_-_Flickr_-_NOAA_Photo_Library.jpg/1280px-Fish4280_-_Flickr_-_NOAA_Photo_Library.jpg" alt="A lined seahorse among underwater plants" loading="lazy">
+            <span class="habitat">Seagrass & reefs</span>
+          </div>
+          <div class="card-content">
+            <h3 class="species-name">Lined seahorse</h3>
+            <p class="scientific">Hippocampus erectus</p>
+            <p class="description">An upright-swimming fish with a curled tail for gripping plants. In a rare role reversal, the male carries developing young in a pouch.</p>
+            <div class="facts">
+              <div class="fact"><span class="fact-label">Length</span><span class="fact-value">Up to 19 cm</span></div>
+              <div class="fact"><span class="fact-label">Diet</span><span class="fact-value">Tiny crustaceans</span></div>
+            </div>
+            <span class="conservation">Vulnerable</span>
+          </div>
+        </article>
+
+        <article class="card" data-name="great white shark">
+          <div class="card-image">
+            <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/7/79/Great_White_Shark_%2814730796397%29.jpg/1280px-Great_White_Shark_%2814730796397%29.jpg" alt="A great white shark swimming in open water" loading="lazy">
+            <span class="habitat">Open ocean</span>
+          </div>
+          <div class="card-content">
+            <h3 class="species-name">Great white shark</h3>
+            <p class="scientific">Carcharodon carcharias</p>
+            <p class="description">A powerful migratory predator with rows of replaceable teeth. Great whites help keep marine food webs balanced.</p>
+            <div class="facts">
+              <div class="fact"><span class="fact-label">Length</span><span class="fact-value">Up to 6 m</span></div>
+              <div class="fact"><span class="fact-label">Diet</span><span class="fact-value">Fish & seals</span></div>
+            </div>
+            <span class="conservation">Vulnerable</span>
+          </div>
+        </article>
+
+        <article class="card" data-name="bottlenose dolphin">
+          <div class="card-image">
+            <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/6/60/010_Atlantic_bottlenose_dolphin_jumping_at_Pelican_point_Photo_by_Giles_Laurent.jpg/1280px-010_Atlantic_bottlenose_dolphin_jumping_at_Pelican_point_Photo_by_Giles_Laurent.jpg" alt="An Atlantic bottlenose dolphin leaping above the sea" loading="lazy">
+            <span class="habitat">Coastal & open ocean</span>
+          </div>
+          <div class="card-content">
+            <h3 class="species-name">Bottlenose dolphin</h3>
+            <p class="scientific">Tursiops truncatus</p>
+            <p class="description">A social, curious dolphin that uses clicks and whistles to communicate and echolocation to find prey.</p>
+            <div class="facts">
+              <div class="fact"><span class="fact-label">Length</span><span class="fact-value">2–4 m</span></div>
+              <div class="fact"><span class="fact-label">Diet</span><span class="fact-value">Fish & squid</span></div>
+            </div>
+            <span class="conservation">Least concern</span>
+          </div>
+        </article>
+
+        <article class="card" data-name="lionfish">
+          <div class="card-image">
+            <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/0/07/Pterois_volitans_Manado-e.jpg/1280px-Pterois_volitans_Manado-e.jpg" alt="A red lionfish with long striped fins" loading="lazy">
+            <span class="habitat">Reef</span>
+          </div>
+          <div class="card-content">
+            <h3 class="species-name">Red lionfish</h3>
+            <p class="scientific">Pterois volitans</p>
+            <p class="description">A striking Indo-Pacific reef fish with venomous fin spines. Introduced populations in the Atlantic can disrupt local reef communities.</p>
+            <div class="facts">
+              <div class="fact"><span class="fact-label">Length</span><span class="fact-value">Up to 38 cm</span></div>
+              <div class="fact"><span class="fact-label">Diet</span><span class="fact-value">Small fish</span></div>
+            </div>
+            <span class="conservation">Least concern</span>
+          </div>
+        </article>
+
+        <article class="card" data-name="moon jellyfish">
+          <div class="card-image">
+            <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f9/Aurelia_aurita_%28Cnidaria%29_Luc_Viatour.jpg/1280px-Aurelia_aurita_%28Cnidaria%29_Luc_Viatour.jpg" alt="A translucent moon jellyfish drifting in blue water" loading="lazy">
+            <span class="habitat">Coastal seas</span>
+          </div>
+          <div class="card-content">
+            <h3 class="species-name">Moon jellyfish</h3>
+            <p class="scientific">Aurelia aurita</p>
+            <p class="description">Nearly transparent and recognized by four petal-shaped markings. Its gentle stinging cells catch tiny plankton in the water.</p>
+            <div class="facts">
+              <div class="fact"><span class="fact-label">Bell</span><span class="fact-value">Up to 40 cm</span></div>
+              <div class="fact"><span class="fact-label">Diet</span><span class="fact-value">Plankton</span></div>
+            </div>
+            <span class="conservation">Not evaluated</span>
+          </div>
+        </article>
+
+        <article class="card" data-name="sea otter">
+          <div class="card-image">
+            <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f8/Sea-otter-morro-bay_13.jpg/1280px-Sea-otter-morro-bay_13.jpg" alt="A sea otter floating among kelp" loading="lazy">
+            <span class="habitat">Kelp forests</span>
+          </div>
+          <div class="card-content">
+            <h3 class="species-name">Sea otter</h3>
+            <p class="scientific">Enhydra lutris</p>
+            <p class="description">The densest-furred marine mammal. By eating sea urchins, otters help protect kelp forests that shelter many ocean species.</p>
+            <div class="facts">
+              <div class="fact"><span class="fact-label">Length</span><span class="fact-value">Up to 1.5 m</span></div>
+              <div class="fact"><span class="fact-label">Diet</span><span class="fact-value">Urchins & clams</span></div>
+            </div>
+            <span class="conservation">Endangered</span>
+          </div>
+        </article>
+
+        <article class="card" data-name="atlantic blue tang">
+          <div class="card-image">
+            <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/8/89/Atlantic_Blue_Tang_%28Acanthurus_coeruleus%29.jpg/1280px-Atlantic_Blue_Tang_%28Acanthurus_coeruleus%29.jpg" alt="An Atlantic blue tang swimming near a reef" loading="lazy">
+            <span class="habitat">Caribbean reef</span>
+          </div>
+          <div class="card-content">
+            <h3 class="species-name">Atlantic blue tang</h3>
+            <p class="scientific">Acanthurus coeruleus</p>
+            <p class="description">A reef-dwelling surgeonfish that changes from yellow as a juvenile to blue as an adult. It grazes algae from reef surfaces.</p>
+            <div class="facts">
+              <div class="fact"><span class="fact-label">Length</span><span class="fact-value">Up to 39 cm</span></div>
+              <div class="fact"><span class="fact-label">Diet</span><span class="fact-value">Algae</span></div>
+            </div>
+            <span class="conservation">Least concern</span>
+          </div>
+        </article>
+
+        <article class="card" data-name="whale shark">
+          <div class="card-image">
+            <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f0/Rhincodon_typus%2C_whale_shark_IMG_7075.jpg/1280px-Rhincodon_typus%2C_whale_shark_IMG_7075.jpg" alt="A spotted whale shark swimming through the ocean" loading="lazy">
+            <span class="habitat">Tropical open ocean</span>
+          </div>
+          <div class="card-content">
+            <h3 class="species-name">Whale shark</h3>
+            <p class="scientific">Rhincodon typus</p>
+            <p class="description">The world’s largest fish, identified by its pattern of pale spots. This gentle giant filters plankton and small fish from the water.</p>
+            <div class="facts">
+              <div class="fact"><span class="fact-label">Length</span><span class="fact-value">Up to 18 m</span></div>
+              <div class="fact"><span class="fact-label">Diet</span><span class="fact-value">Plankton</span></div>
+            </div>
+            <span class="conservation">Endangered</span>
+          </div>
+        </article>
+
+        <article class="card" data-name="harbor seal">
+          <div class="card-image">
+            <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b0/Harbor_seal_%28Phoca_vitulina%29_at_Magdalen_fjord%2C_Svalbard_%281%29.jpg/1280px-Harbor_seal_%28Phoca_vitulina%29_at_Magdalen_fjord%2C_Svalbard_%281%29.jpg" alt="A harbor seal resting on a rocky shore" loading="lazy">
+            <span class="habitat">Coastal waters</span>
+          </div>
+          <div class="card-content">
+            <h3 class="species-name">Harbor seal</h3>
+            <p class="scientific">Phoca vitulina</p>
+            <p class="description">A spotted coastal seal that hauls out on beaches and rocks to rest. Sensitive whiskers help it follow the wakes of fish.</p>
+            <div class="facts">
+              <div class="fact"><span class="fact-label">Length</span><span class="fact-value">Up to 1.9 m</span></div>
+              <div class="fact"><span class="fact-label">Diet</span><span class="fact-value">Fish & squid</span></div>
+            </div>
+            <span class="conservation">Least concern</span>
+          </div>
+        </article>
+
+        <article class="card" data-name="ochre sea star">
+          <div class="card-image">
+            <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ad/Orange_Starfish_at_Olympic_National_Park.jpg/1280px-Orange_Starfish_at_Olympic_National_Park.jpg" alt="An orange ochre sea star clinging to a rocky shore" loading="lazy">
+            <span class="habitat">Pacific tide pools</span>
+          </div>
+          <div class="card-content">
+            <h3 class="species-name">Ochre sea star</h3>
+            <p class="scientific">Pisaster ochraceus</p>
+            <p class="description">A keystone tide-pool predator that pries open mussels with its tube feet, helping maintain diversity on rocky shores.</p>
+            <div class="facts">
+              <div class="fact"><span class="fact-label">Width</span><span class="fact-value">Up to 25 cm</span></div>
+              <div class="fact"><span class="fact-label">Diet</span><span class="fact-value">Mussels</span></div>
+            </div>
+            <span class="conservation">Not evaluated</span>
+          </div>
+        </article>
+
+        <article class="card" data-name="green moray eel">
+          <div class="card-image">
+            <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/7/79/Green_Moray_Eel_%28Gymnothorax_funebris%29%2C_Cozumel.jpg/1280px-Green_Moray_Eel_%28Gymnothorax_funebris%29%2C_Cozumel.jpg" alt="A green moray eel peeking from a coral reef crevice" loading="lazy">
+            <span class="habitat">Caribbean reef</span>
+          </div>
+          <div class="card-content">
+            <h3 class="species-name">Green moray eel</h3>
+            <p class="scientific">Gymnothorax funebris</p>
+            <p class="description">A large reef eel that shelters in rocky crevices by day and hunts fish and crustaceans at night. Its green color comes from protective mucus.</p>
+            <div class="facts">
+              <div class="fact"><span class="fact-label">Length</span><span class="fact-value">Up to 2.5 m</span></div>
+              <div class="fact"><span class="fact-label">Diet</span><span class="fact-value">Fish & crabs</span></div>
+            </div>
+            <span class="conservation">Least concern</span>
+          </div>
+        </article>
+
+        <article class="card" data-name="atlantic horseshoe crab">
+          <div class="card-image">
+            <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e4/Atlantic_horseshoe_crab_%28Limulus_polyphemus%29.jpg/1280px-Atlantic_horseshoe_crab_%28Limulus_polyphemus%29.jpg" alt="An Atlantic horseshoe crab on a sandy seabed" loading="lazy">
+            <span class="habitat">Shallow coastal seabed</span>
+          </div>
+          <div class="card-content">
+            <h3 class="species-name">Atlantic horseshoe crab</h3>
+            <p class="scientific">Limulus polyphemus</p>
+            <p class="description">An ancient relative of spiders, not a true crab. Each spring, adults gather on beaches to lay eggs that feed migrating shorebirds.</p>
+            <div class="facts">
+              <div class="fact"><span class="fact-label">Lifespan</span><span class="fact-value">About 20 years</span></div>
+              <div class="fact"><span class="fact-label">Diet</span><span class="fact-value">Worms & clams</span></div>
+            </div>
+            <span class="conservation">Vulnerable</span>
+          </div>
+        </article>
+
+        <article class="card" data-name="beluga whale">
+          <div class="card-image">
+            <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/6/69/Beluga_Whale_02.jpg/1280px-Beluga_Whale_02.jpg" alt="A white beluga whale swimming underwater" loading="lazy">
+            <span class="habitat">Arctic waters</span>
+          </div>
+          <div class="card-content">
+            <h3 class="species-name">Beluga whale</h3>
+            <p class="scientific">Delphinapterus leucas</p>
+            <p class="description">An Arctic whale known for its flexible neck and many chirps, whistles, and clicks—earning it the nickname “sea canary.”</p>
+            <div class="facts">
+              <div class="fact"><span class="fact-label">Length</span><span class="fact-value">Up to 5.5 m</span></div>
+              <div class="fact"><span class="fact-label">Diet</span><span class="fact-value">Fish & squid</span></div>
+            </div>
+            <span class="conservation">Least concern</span>
+          </div>
+        </article>
+
+        <article class="card" data-name="emperor penguin">
+          <div class="card-image">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a3/Aptenodytes_forsteri_-Snow_Hill_Island%2C_Antarctica_-adults_and_juvenile-8.jpg" alt="Emperor penguins gathered on Antarctic ice" loading="lazy">
+            <span class="habitat">Antarctic coast</span>
+          </div>
+          <div class="card-content">
+            <h3 class="species-name">Emperor penguin</h3>
+            <p class="scientific">Aptenodytes forsteri</p>
+            <p class="description">The tallest penguin, adapted to life on Antarctic sea ice. Parents take turns keeping a single egg warm through the winter.</p>
+            <div class="facts">
+              <div class="fact"><span class="fact-label">Height</span><span class="fact-value">Up to 1.2 m</span></div>
+              <div class="fact"><span class="fact-label">Diet</span><span class="fact-value">Fish & krill</span></div>
+            </div>
+            <span class="conservation">Near threatened</span>
+          </div>
+        </article>
+
+        <article class="card" data-name="blue parrotfish">
+          <div class="card-image">
+            <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/3/37/Blue_parrotfish_in_R%C3%A9union.jpg/1280px-Blue_parrotfish_in_R%C3%A9union.jpg" alt="A blue parrotfish swimming above coral" loading="lazy">
+            <span class="habitat">Tropical reef</span>
+          </div>
+          <div class="card-content">
+            <h3 class="species-name">Blue parrotfish</h3>
+            <p class="scientific">Scarus coeruleus</p>
+            <p class="description">A reef fish with fused, beak-like teeth that scrapes algae from coral. The ground-up coral passes through as fine sand.</p>
+            <div class="facts">
+              <div class="fact"><span class="fact-label">Length</span><span class="fact-value">Up to 1.2 m</span></div>
+              <div class="fact"><span class="fact-label">Diet</span><span class="fact-value">Algae</span></div>
+            </div>
+            <span class="conservation">Least concern</span>
+          </div>
+        </article>
+      </div>
+      <p class="empty-state" id="empty-state" role="status">No species match your search. Try another name.</p>
+
+      <section class="care-section" id="ocean-care" aria-labelledby="care-title">
+        <div class="care-heading">
+          <p class="eyebrow" style="color: var(--sea);">Care for the blue</p>
+          <h2 id="care-title">Healthy oceans need all of us</h2>
+          <p>Small, steady actions can reduce pressure on marine habitats. Start where you are, choose what feels manageable, and keep learning about the issues that matter in your community.</p>
+        </div>
+
+        <div class="care-grid">
+          <article class="care-card">
+            <h3>Cut down on waste</h3>
+            <p>Carry a reusable bottle and bag, skip unnecessary single-use packaging, and sort waste according to local recycling rules. Keep litter secured so it cannot blow into storm drains and waterways.</p>
+          </article>
+          <article class="care-card">
+            <h3>Choose ocean-friendly meals</h3>
+            <p>Ask where seafood comes from and how it was caught or farmed. Use a trusted regional seafood guide, try plant-forward meals, and avoid products whose origin cannot be clearly explained.</p>
+          </article>
+          <article class="care-card">
+            <h3>Give wildlife room</h3>
+            <p>Watch marine animals quietly from a distance. Never feed, chase, touch, or block their path; follow local viewing rules and leave shells, coral, and other natural finds where they belong.</p>
+          </article>
+          <article class="care-card">
+            <h3>Help habitats and research</h3>
+            <p>Join a well-organized beach or river cleanup, support reputable conservation groups, and take part in local wildlife counts or community science projects. Share reliable information, not wildlife locations that could put animals at risk.</p>
+          </article>
+        </div>
+
+        <div class="pledge-panel">
+          <div class="pledge-intro">
+            <p class="eyebrow" style="color: var(--sea);">Make it personal</p>
+            <h3>Your ocean-care plan</h3>
+            <p>Choose the actions you want to focus on and write one practical next step. Your plan is saved only in this browser on this device; it is not sent to a server.</p>
+          </div>
+          <div>
+            <form class="pledge-form" id="pledge-form">
+              <label for="pledge-name">Name or nickname <span style="font-weight:400;">(optional)</span>
+                <input id="pledge-name" name="name" type="text" maxlength="60" autocomplete="given-name" placeholder="How should we address you?">
+              </label>
+
+              <fieldset>
+                <legend>What would you like to focus on?</legend>
+                <label class="check-label"><input type="checkbox" name="actions" value="less-waste">Use fewer single-use items</label>
+                <label class="check-label"><input type="checkbox" name="actions" value="wildlife">Respect wildlife and habitats</label>
+                <label class="check-label"><input type="checkbox" name="actions" value="seafood">Make informed seafood choices</label>
+                <label class="check-label"><input type="checkbox" name="actions" value="community">Join a local ocean-care effort</label>
+              </fieldset>
+
+              <label for="pledge-details">My next step
+                <textarea id="pledge-details" name="details" maxlength="300" required placeholder="For example: I’ll bring a reusable bottle on my next trip."></textarea>
+              </label>
+
+              <div class="pledge-actions">
+                <button class="pledge-button" type="submit">Save my plan</button>
+                <button class="pledge-button secondary" id="clear-pledge" type="button" hidden>Clear saved plan</button>
+              </div>
+              <p class="pledge-status" id="pledge-status" role="status" aria-live="polite"></p>
+              <section class="saved-pledge" id="saved-pledge" aria-labelledby="saved-pledge-title" hidden>
+                <h4 id="saved-pledge-title">Your saved plan</h4>
+                <p id="saved-pledge-name"></p>
+                <ul id="saved-pledge-actions" hidden></ul>
+                <p class="saved-details" id="saved-pledge-details"></p>
+              </section>
+            </form>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <footer>
+    <strong>Blue Atlas</strong>
+    <span>A little closer to the living ocean · Learn, respect, protect.</span>
+  </footer>
+
+  <script>
+    const searchInput = document.querySelector("#species-search");
+    const cards = document.querySelectorAll(".card");
+    const emptyState = document.querySelector("#empty-state");
+    const pledgeForm = document.querySelector("#pledge-form");
+    const pledgeNameInput = document.querySelector("#pledge-name");
+    const pledgeDetailsInput = document.querySelector("#pledge-details");
+    const pledgeStatus = document.querySelector("#pledge-status");
+    const savedPledge = document.querySelector("#saved-pledge");
+    const savedPledgeName = document.querySelector("#saved-pledge-name");
+    const savedPledgeActions = document.querySelector("#saved-pledge-actions");
+    const savedPledgeDetails = document.querySelector("#saved-pledge-details");
+    const clearPledgeButton = document.querySelector("#clear-pledge");
+    const pledgeStorageKey = "blue-atlas-ocean-plan";
+    const actionLabels = {
+      "less-waste": "Use fewer single-use items",
+      wildlife: "Respect wildlife and habitats",
+      seafood: "Make informed seafood choices",
+      community: "Join a local ocean-care effort"
+    };
+
+    function updateSpecies() {
+      const query = searchInput.value.trim().toLowerCase();
+      let visibleCount = 0;
+
+      cards.forEach((card) => {
+        const matchesName = card.dataset.name.includes(query);
+        card.hidden = !matchesName;
+        if (matchesName) visibleCount += 1;
+      });
+
+      emptyState.classList.toggle("visible", visibleCount === 0);
+    }
+
+    searchInput.addEventListener("input", updateSpecies);
+
+    function showSavedPledge(pledge) {
+      savedPledgeName.textContent = pledge.name ? "For " + pledge.name : "Your plan is saved in this browser";
+      savedPledgeActions.replaceChildren();
+
+      pledge.actions.forEach((action) => {
+        const item = document.createElement("li");
+        item.textContent = actionLabels[action];
+        savedPledgeActions.append(item);
+      });
+
+      savedPledgeActions.hidden = pledge.actions.length === 0;
+      savedPledgeDetails.textContent = pledge.details;
+      savedPledge.hidden = false;
+      clearPledgeButton.hidden = false;
+    }
+
+    function parseSavedPledge(value) {
+      const pledge = JSON.parse(value);
+      if (!pledge || typeof pledge !== "object" || Array.isArray(pledge) ||
+          typeof pledge.name !== "string" || pledge.name.length > 60 ||
+          typeof pledge.details !== "string" || !pledge.details.trim() || pledge.details.length > 300 ||
+          !Array.isArray(pledge.actions) ||
+          !pledge.actions.every((action) => Object.prototype.hasOwnProperty.call(actionLabels, action))) {
+        throw new Error("The saved plan has an unexpected format.");
+      }
+
+      return {
+        name: pledge.name.trim(),
+        actions: pledge.actions,
+        details: pledge.details.trim()
+      };
+    }
+
+    try {
+      const savedValue = window.localStorage.getItem(pledgeStorageKey);
+      if (savedValue !== null) {
+        const pledge = parseSavedPledge(savedValue);
+        pledgeNameInput.value = pledge.name;
+        pledgeDetailsInput.value = pledge.details;
+        pledgeForm.querySelectorAll('input[name="actions"]').forEach((input) => {
+          input.checked = pledge.actions.includes(input.value);
+        });
+        showSavedPledge(pledge);
+        pledgeStatus.textContent = "Your saved plan is ready. You can update it any time.";
+      }
+    } catch (error) {
+      pledgeStatus.textContent = "We couldn't load your saved plan. Browser storage may be unavailable or the saved data may be damaged.";
+    }
+
+    pledgeForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const details = pledgeDetailsInput.value.trim();
+
+      if (!details) {
+        pledgeDetailsInput.setCustomValidity("Please write one practical next step.");
+        pledgeForm.reportValidity();
+        return;
+      }
+
+      pledgeDetailsInput.setCustomValidity("");
+      const pledge = {
+        name: pledgeNameInput.value.trim(),
+        actions: [...pledgeForm.querySelectorAll('input[name="actions"]:checked')].map((input) => input.value),
+        details
+      };
+
+      try {
+        window.localStorage.setItem(pledgeStorageKey, JSON.stringify(pledge));
+        showSavedPledge(pledge);
+        pledgeStatus.textContent = "Your plan has been saved in this browser.";
+      } catch (error) {
+        pledgeStatus.textContent = "We couldn't save your plan. Check your browser's storage settings and try again.";
+      }
+    });
+
+    pledgeDetailsInput.addEventListener("input", () => {
+      pledgeDetailsInput.setCustomValidity("");
+    });
+
+    clearPledgeButton.addEventListener("click", () => {
+      try {
+        window.localStorage.removeItem(pledgeStorageKey);
+        pledgeForm.reset();
+        savedPledge.hidden = true;
+        clearPledgeButton.hidden = true;
+        pledgeStatus.textContent = "Your saved plan was cleared from this browser.";
+      } catch (error) {
+        pledgeStatus.textContent = "We couldn't clear your saved plan. Check your browser's storage settings and try again.";
+      }
+    });
+  </script>
+</body>
+</html>
